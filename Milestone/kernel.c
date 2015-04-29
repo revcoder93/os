@@ -1,11 +1,11 @@
 void printString(char*);
 void readString(char*);
 void readSector(char*, int);
-void writeSector(char*, int);
-void readFile(char* filename, char* buffer);
-void deleteFile(char* name);
-void writeFile(char* name, char* buffer, int secNum);
-void executeProgram(char* name, int segment);
+// void writeSector(char*, int);
+void readFile(char*, char*);
+// void deleteFile(char*);
+// void writeFile(char*, char*, int );
+void executeProgram(char* , int );
 void terminate();
 void handleInterrupt21(int,int,int,int);
 int mod(int,int);
@@ -47,8 +47,8 @@ void main ()
 }
 
 void printString(char* input)
-{	
-while (*input != 0)
+{
+	while (*input != 0)
 	{
 		char x = *input;
 		interrupt(0x10, 0xE*256+x, 0, 0, 0);
@@ -90,16 +90,14 @@ void readSector(char* buffer, int sector)
 	int CH = div(sector, 36);
 	interrupt(0x13,2*256+1,buffer,CH*256+CL,DH*256+0);
 }
-
-void writeSector(char* buffer, int sector)
-{
-	int c = div(sector , 18);
-	int CL = mod(sector, 18) + 1;
-	int DH = mod(c, 2);
-	int CH = div(sector, 36);
-	interrupt(0x13,3*256+1,buffer,CH*256+CL,DH*256+0);
-}
-
+// void writeSector(char* buffer, int sector)
+// {
+// 	int c = div(sector , 18);
+// 	int CL = mod(sector, 18) + 1;
+// 	int DH = mod(c, 2);
+// 	int CH = div(sector, 36);
+// 	interrupt(0x13,3*256+1,buffer,CH*256+CL,DH*256+0);
+// }
 void readFile(char* filename, char* buffer)
 {
 	char sectorChar;
@@ -152,104 +150,104 @@ void readFile(char* filename, char* buffer)
 	}
 
 }
-void deleteFile(char* name)
-{
-	char directoryBuffer[512];
-	char map[512];
-	int i = 0;
-	int j = 0;
-	int spaceInDirectory = 0;
-	int sectors = 0;
-	int equal = 1;
-	int sectorNum = 0;
-	readSector(map,1);
-	readSector(directoryBuffer, 2);
+// void deleteFile(char* name)
+// {
+// 	char directoryBuffer[512];
+// 	char map[512];
+// 	int i = 0;
+// 	int j = 0;
+// 	int spaceInDirectory = 0;
+// 	int sectors = 0;
+// 	int equal = 1;
+// 	int sectorNum = 0;
+// 	readSector(map,1);
+// 	readSector(directoryBuffer, 2);
 
-	while (i < 512) {
-		equal = 1;
+// 	while (i < 512) {
+// 		equal = 1;
 
-		while (j < 6) {
-			if (directoryBuffer[i+j] != name[j]) {
-				equal = 0;
-				break;
-			}
-			j++;
-		}
-		if(equal == 1) {
-			spaceInDirectory = i;
-			break;
-		}
-		j=0;
-		i += 32;
-	}
+// 		while (j < 6) {
+// 			if (directoryBuffer[i+j] != name[j]) {
+// 				equal = 0;
+// 				break;
+// 			}
+// 			j++;
+// 		}
+// 		if(equal == 1) {
+// 			spaceInDirectory = i;
+// 			break;
+// 		}
+// 		j=0;
+// 		i += 32;
+// 	}
 
-	if (i == 512 || equal == 0) {
-		return;
-	}
-	while(directoryBuffer[spaceInDirectory + 6 + sectors] != 0) {
-		sectors += 1;
-	}
-	directoryBuffer[i + 1] = 0;
-	j = 0;
-	while(j < sectors){
-		sectorNum = (int)directoryBuffer[i + 6 + j];
-		map[sectorNum + 1] = 0;
-		j++;
-	}
-	writeSector(map,1);
-	writeSector(directoryBuffer,2);
-}
-void writeFile(char* name, char* buffer, int secNum)
-{
-	char directoryBuffer[512];
-	char map[512];
-	int i = 0;
-	int j = 0;
-	int pos = 0;
-	int sectors = 0;
-	readSector(map,1);
-	readSector(directoryBuffer,2);
-	//Loop through the directory buffer to check for an empty entry.
-	while (i < 512) {
-			if (directoryBuffer[i] == 0) {
-				break;
-			}
-		i += 32;
-	}
-	if(i == 512){
-		printString("Error 404 : Space not found.");
-		return;
-	}
-	//Copy the name of the file to the directory buffer.
-	while(j < 6){
-		directoryBuffer[i+j] = name[j];
-		j++;
-	}
-	//Update the directory and map with the new data.
-	j = 0;
-	pos = i;
-	while(j < 512){
-		if(map[j] == 0){
-			if(sectors <= secNum){
-			map[j] = 0xFF;
-			directoryBuffer[pos + 6] = j;
-			writeSector(buffer,j);
-			sectors++;
-			pos++;
-			}
-		}
-	}
-	if(sectors != secNum){
-		printString("Error 404 : Space not found.");
-	}
-	//Fill the remaining positons with 0s.
-	while(pos < i+32){
-		directoryBuffer[pos] = 0;
-		pos++;
-	}
-	writeSector(map,1);
-	writeSector(directoryBuffer,2);
-}
+// 	if (i == 512 || equal == 0) {
+// 		return;
+// 	}
+// 	while(directoryBuffer[spaceInDirectory + 6 + sectors] != 0) {
+// 		sectors += 1;
+// 	}
+// 	directoryBuffer[i + 1] = 0;
+// 	j = 0;
+// 	while(j < sectors){
+// 		sectorNum = (int)directoryBuffer[i + 6 + j];
+// 		map[sectorNum + 1] = 0;
+// 		j++;
+// 	}
+// 	writeSector(map,1);
+// 	writeSector(directoryBuffer,2);
+// }
+// void writeFile(char* name, char* buffer, int secNum)
+// {
+// 	char directoryBuffer[512];
+// 	char map[512];
+// 	int i = 0;
+// 	int j = 0;
+// 	int pos = 0;
+// 	int sectors = 0;
+// 	readSector(map,1);
+// 	readSector(directoryBuffer,2);
+// 	//Loop through the directory buffer to check for an empty entry.
+// 	while (i < 512) {
+// 			if (directoryBuffer[i] == 0) {
+// 				break;
+// 			}
+// 		i += 32;
+// 	}
+// 	if(i == 512){
+// 		printString("Error 404 : Space not found.");
+// 		return;
+// 	}
+// 	//Copy the name of the file to the directory buffer.
+// 	while(j < 6){
+// 		directoryBuffer[i+j] = name[j];
+// 		j++;
+// 	}
+// 	//Update the directory and map with the new data.
+// 	j = 0;
+// 	pos = i;
+// 	while(j < 512){
+// 		if(map[j] == 0){
+// 			if(sectors <= secNum){
+// 			map[j] = 0xFF;
+// 			directoryBuffer[pos + 6] = j;
+// 			writeSector(buffer,j);
+// 			sectors++;
+// 			pos++;
+// 			}
+// 		}
+// 	}
+// 	if(sectors != secNum){
+// 		printString("Error 404 : Space not found.");
+// 	}
+// 	//Fill the remaining positons with 0s.
+// 	while(pos < i+32){
+// 		directoryBuffer[pos] = 0;
+// 		pos++;
+// 	}
+// 	writeSector(map,1);
+// 	writeSector(directoryBuffer,2);
+// }
 void executeProgram(char* name, int segment)
 {
 	char buffer[1000];
@@ -271,7 +269,9 @@ void executeProgram(char* name, int segment)
 }
 void terminate() 
 {
-	interrupt(0x21, 6, "shell\0", 0x2000, 0);
+	makeInterrupt21();
+	interrupt(0x21, 4, "shell\0", 0x2000, 0);
+	while(1){}
 }
 
 void handleInterrupt21(int ax, int bx, int cx, int dx)
@@ -302,18 +302,18 @@ void handleInterrupt21(int ax, int bx, int cx, int dx)
 		terminate();
 	}
 
-	if (ax == 6)
-	{
-		writeSector(bx,cx);
-	}
-	if (ax == 7)
-	{
-		deleteFile(bx);
-	}
-	if (ax == 8)
-	{
-		writeFile(bx, cx, dx);
-	}
+	// if (ax == 6)
+	// {
+	// 	writeSector(bx,cx);
+	// }
+	// if (ax == 7)
+	// {
+	// 	deleteFile(bx);
+	// }
+	// if (ax == 8)
+	// {
+	// 	writeFile(bx, cx, dx);
+	// }
 	if (ax >= 9)
 	{
 		printString("Error! check your AX!!!!!!!!");
