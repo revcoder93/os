@@ -1,6 +1,6 @@
 int view(char* input);
 int execute(char* input);
-int delete(char* input);
+int remove(char* input);
 char* notFoundCommand = "Command not found\r\n\0";
 char* viewCommand = "view\0";
 char* executeCommand = "execute\0";
@@ -19,9 +19,10 @@ void main() {
 		} else if (execute(line) == 1) {
 			interrupt(0x21, 4, line + 8, 0x2000, 0);
 		}
-		else if (delete(line) == 1) {
-			interrupt(0x21, 4, line + 8, 0x2000, 0);
-		} else {
+		// else if (delete(line) == 1) {
+		// 	interrupt(0x21, 7, line + 7, 0, 0);
+		// }
+		 else {
 			interrupt(0x21, 0, notFoundCommand, 0, 0);
 		}
 	}
@@ -59,8 +60,9 @@ int execute(char* input)
 	 return found;
 }
 
-int delete(char* input)
+int remove(char* input)
 {
+
 	int found = 1;
 	int i = 0;
 	while(i < 6){
